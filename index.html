@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TheGame</title>
+    <style>
+            body, html {
+            height: 100%; /* Asegura que el cuerpo y el html ocupen toda la altura */
+            margin: 0; /* Elimina los márgenes predeterminados */
+            display: flex; /* Utiliza flexbox para alinear el contenido */
+            justify-content: center; /* Centra horizontalmente */
+            align-items: center; /* Centra verticalmente */
+        }
+        .boton {
+            display: inline-block;
+            margin-right: 10px; /* Espacio entre botones */
+        }
+    .botones{
+     display: block; /* Para que cada div sea mostrado como un bloque */
+      margin-bottom: 10px; /* Espacio entre los divs */
+    }
+            .contenedor {
+            width: 80%; /* Anchura del contenedor */
+            padding: 40px; /* Relleno interior del contenedor */
+            align-items: center; /* Centra verticalmente */
+            text-align: center; /* Alinea el texto al centro */
+        }
+
+    </style>
+</head>
+<body>
+    {% if p %}
+    <div class="contenedor">
+            <h1>Insert Name</h1>
+            <form action="/nombre" method="post">
+                <input type="text" name="nombre" placeholder="Name">
+                <input type="submit" value="Save">    
+    </div>
+   {% endif %}
+    {% if pp %}
+    <div class="contenedor">
+     <h1>Welcome {{nombre}} <h1>
+         <form action="/typ3" method="post">
+              <button type="submit" name="boton">Continue</button>
+        </form>
+        <form action="/otro" method="post">
+            <button type="submit" name="boton">Return</button>
+        </form>
+     {% endif %}
+     {% if typ3 %}
+     <div class="contendedor">
+        <h1>Select Race<h1>
+         <form action="/menu" method="post">
+         <button type="submit" name="tipo" value="1">Elf</button>
+         </form> 
+         <form action="/menu" method="post">
+         <button type="submit" name="tipo" value="2">Human</button>
+         </form> 
+         <form action="/menu" method="post">
+         <button type="submit" name="tipo" value="3">Hobbit</button>
+         </form>   
+     {% endif %}
+     {% if menu %}
+     <div class="contendedor">
+     <h1>Main menu<h1>
+    <form action="/combat" method="post">
+         <button type="submit" name="tipo" value="1">Combat(Out of order)</button>
+    </form>
+    <form action="/stats" method="post">
+         <button type="submit" name="tipo" value="2">Stats</button>
+    </form>
+    <form action="/inventory" method="post">
+         <button type="submit" name="tipo" value="4">Inventory</button>
+    </form>
+    <form action="/store" method="post">
+         <button type="submit" name="tipo" value="3">Store</button>         
+    </form>        
+     {% endif %}
+     {% if menu2c %}
+     <div class="contendedor">
+     <form action="/combat" method="post">
+         <div class="botones">
+         <button type="submit" name="tipo" value="1">Combat</button>
+         <div class="botones">
+         <button type="submit" name="tipo" value="2">Stats</button>
+         <div class="botones">
+         <button type="submit" name="tipo" value="3">Inventory</button>
+     {% endif %}
+     {% if stats %}
+     <div class="contendedor">
+         {{ stat|safe }}
+         <form action="/menu" method="post">
+             <button type="submit" name="tipo" value="4">Return</button>
+     {% endif %}
+     {% if inneg%}
+         <div class="contendedor">
+         {{ men|safe }}
+         <form action="/menu" method="post">
+             <button type="submit" name="tipo" value="5">Return</button>
+     {% endif%}
+     {% if ineg%}
+     <div class="contendedor">
+         {{ men|safe }}
+         <form action="/store" method="post">
+             <button type="submit" name="tipo">Continue</button>
+     {% endif%}
+     {% if inv%}
+      <div class="contendedor">
+          {{ men|safe }}
+          <form action="/menu" method="post">
+              <button type="submit" name="tipo" value="6">Return</button>
+     {% endif %}
+     {% if inv2%}
+      <div class="contendedor">
+          {{ men|safe }}
+          <form action="/menu" method="post">
+              <button type="submit" name="tipo" value="7">Continue</button>
+     {% endif %}
+</body>
+</html>
