@@ -459,10 +459,161 @@ def store():
             """
         return render_template('index.html',menu=False,inneg=True,men=text)
 
-
 @app.route('/combat', methods=['GET', 'POST'])
 def combat():
-    return render_template('index.html',)
+    men=f"<p>Health {playerData.health}/{playerData.healthL}<p>"
+    men+=f"<p>Enemy health {playerData.enemyHP}/{playerData.enemyHPL}<p>"
+    men+="""
+    <form action="/La" method="post">
+    <button type="submit" name="boton">Light attack</button>
+    </form>
+    """
+    men+="""
+    <form action="/ha" method="post">
+    <button type="submit" name="boton">Heavy attack</button>
+    </form>
+    """
+    if playerData.ppq>0:
+        men+="""
+        <form action="/pq2" method="post">
+        <button type="submit" name="boton">Small potion(+10% health)</button>
+        </form>
+        """
+    elif playerData.pm>0:
+        men+="""
+        <form action="/pm2" method="post">
+        <button type="submit" name="boton">Medium potion (+30% health)</button>
+        </form>
+        """
+    elif playerData.pS>0:
+      men+="""
+      <form action="/pS2" method="post">
+      <button type="submit" name="boton">DHoly potion (Max Health)</button>
+      </form>
+      """
+    return render_template('index.html',menu=False,combat=True)
+@app.route('/ha', methods=['GET', 'POST'])
+def ha():
+        daño=5+random.randint(0,25)
+        red=(daño * playerData.armadura) / 100.0
+        playerData.enemyDamage=round(daño-red)
+        playerData.health-=playerData.enemyDamage
+        men=f"<p>Enemy dealt {playerData.enemyDamage} point of damage<p>"
+        if playerData.enemyHP<=0:
+            men+="<p>Enemy Defeated\nRewards:\n+50 gold\n+20% Health\n+100XP<p>"
+            playerData.gold+=50
+            playerData.health =playerData.health+(2*(playerData.health/10))
+            playerData.xp += 100
+            if playerData.health==playerData.healthL:
+                men+="<p>Max Health<p>"
+            return render_template('index.html', combat=False, end=True,men=men)
+        if playerData.health>0:
+         poder=(playerData.poder+30)+ random.randint (0,playerData.poder)
+         playerData.enemyHP-=poder
+         men+=f"<p>You dealt {poder}points of damage<p>"
+        return render_template('index.html',menu=False,combat=True)
+        if playerData.health<0:
+            men+="<p>You have been defeated\n-100 gold\nHealth restore to 50%<p>"
+            playerData.gold = playerData.gold - 100;
+            playerData.health = 0;
+            playerData.health = (playerData.healthL/2)
+            return render_template('index.html', combat=False, end=True,men=men)
+@app.route('/la', methods=['GET', 'POST'])
+def La(): 
+    poder=(playerData.poder-10)+ random.randint (0,playerData.poder)
+    playerData.enemyHP-=poder
+    men=f"<p>You dealt {poder}points of damage<p>"
+    if playerData.enemyHP<=0:
+        men+="<p>Enemy Defeated\nRewards:\n+50 gold\n+20% Health\n+100XP<p>"
+        playerData.gold+=50
+        playerData.health =playerData.health+(2*(playerData.health/10))
+        playerData.xp += 100
+        if playerData.health==playerData.healthL:
+            men+="<p>Max Health<p>"
+        return render_template('index.html', combat=False, end=True,men=men)
+    if playerData.enemyHP>0:
+        daño=5+random.randint(0,25)
+        red=(daño * playerData.armadura) / 100.0
+        playerData.enemyDamage=round(daño-red)
+        playerData.health-=playerData.enemyDamage
+        men+=f"<p>Enemy dealt {playerData.enemyDamage} point of damage<p>"
+        if playerData.health<0:
+            men+="<p>You have been defeated\n-100 gold\nHealth restore to 50%<p>"
+            playerData.gold = playerData.gold - 100;
+            playerData.health = 0;
+            playerData.health = (playerData.healthL/2)
+            return render_template('index.html', combat=False, end=True,men=men)
+    return render_template('index.html',menu=False,combat=True)
+@app.route('/pq2', methods=['GET', 'POST'])
+def pq2():
+    if playerData.health==playerData.healthL:
+       men="<p>You have Max health, don´t waste your potions (・へ・)<p>" 
+       return render_template('index.html', combat=False, action=True,men=men)
+    else:
+       men="<p>You have use Small potion(+10% health)<p>"
+       playerData.ppq-=1
+       playerData.health+=(playerData.healthL/10)
+       if playerData.health>=playerData.healthL:
+           men+="<p>MAX health<p>"
+       daño=5+random.randint(0,25)
+       red=(daño * playerData.armadura) / 100.0
+       playerData.enemyDamage=round(daño-red)
+       playerData.health-=playerData.enemyDamage
+       men+=f"<p>Enemy dealt {playerData.enemyDamage} point of damage<p>"
+       if playerData.health<0:
+           men+="<p>You have been defeated\n-100 gold\nHealth restore to 50%<p>"
+           playerData.gold = playerData.gold - 100;
+           playerData.health = 0;
+           playerData.health = (playerData.healthL/2)
+           return render_template('index.html', combat=False, end=True,men=men)
+    return render_template('index.html', combat=False, action=True,men=men)  
+
+@app.route('/pm2', methods=['GET', 'POST'])
+def pm2():
+    if playerData.health==playerData.healthL:
+       men="<p>You have Max health, don´t waste your potions (・へ・)<p>" 
+       return render_template('index.html', combat=False, action=True,men=men)
+    else:
+       men="<p>You have use Medium potion(+30% health)<p>"
+       playerData.pm-=1
+       playerData.health+=3*(playerData.healthL/10)
+       if playerData.health>=playerData.healthL:
+           men+="<p>MAX health<p>"
+       daño=5+random.randint(0,25)
+       red=(daño * playerData.armadura) / 100.0
+       playerData.enemyDamage=round(daño-red)
+       playerData.health-=playerData.enemyDamage
+       men+=f"<p>Enemy dealt {playerData.enemyDamage} point of damage<p>"
+       if playerData.health<0:
+           men+="<p>You have been defeated\n-100 gold\nHealth restore to 50%<p>"
+           playerData.gold = playerData.gold - 100;
+           playerData.health = 0;
+           playerData.health = (playerData.healthL/2)
+           return render_template('index.html', combat=False, end=True,men=men)
+    return render_template('index.html', combat=False, action=True,men=men) 
+
+@app.route('/pS2', methods=['GET', 'POST'])
+def pS2():
+    if playerData.health==playerData.healthL:
+       men="<p>You have Max health, don´t waste your potions (・へ・)<p>" 
+       return render_template('index.html',combat=False, action=True,men=men)
+    else:
+       men="<p>You have use HOLY POTION(MAX health)<p>"
+       playerData.pS-=1
+       playerData.health=playerData.healthL       
+       men+="<p>MAX health<p>"
+       daño=5+random.randint(0,25)
+       red=(daño * playerData.armadura) / 100.0
+       playerData.enemyDamage=round(daño-red)
+       playerData.health-=playerData.enemyDamage
+       men+=f"<p>Enemy dealt {playerData.enemyDamage} point of damage<p>"
+       if playerData.health<0:
+           men+="<p>You have been defeated\n-100 gold\nHealth restore to 50%<p>"
+           playerData.gold = playerData.gold - 100;
+           playerData.health = 0;
+           playerData.health = (playerData.healthL/2)
+           return render_template('index.html', combat=False, end=True,men=men)
+    return render_template('index.html', combat=False, action=True,men=men)
 @app.route('/levelup', methods=['GET', 'POST'])
 def levelup(playerData):
     if playerData.xp >= playerData.xpLimit and playerData.lvl < 10:
