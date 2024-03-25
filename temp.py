@@ -521,6 +521,7 @@ def levelup(playerData):
              playerData.xpLimit = 200
              men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
         return render_template("index.html",combat=False,lvlup=True,men=men)
+    return render_template("index.html",combat=False,menu=True)
 
 if __name__ == '__main__':
     playerData = PlayerData()
