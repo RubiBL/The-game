@@ -301,6 +301,8 @@ def menu():
         return render_template('index.html', inv=False, menu=True)
     elif x=='7':
         return render_template('index.html', inv2=False, inv=True)
+    elif x=='8':
+        return render_template('index.html', levelup=False, menu=True)
 
 @app.route('/pq', methods=['GET', 'POST'])
 def pq():
@@ -461,7 +463,64 @@ def store():
 @app.route('/combat', methods=['GET', 'POST'])
 def combat():
     return render_template('index.html',)
-
+@app.route('/levelup', methods=['GET', 'POST'])
+def levelup(playerData):
+    if playerData.xp >= playerData.xpLimit and playerData.lvl < 10:
+        if playerData.xp >= playerData.xpLimit and playerData.lvl == 1:
+            playerData.lvl = 2
+            playerData.xp -= playerData.xpLimit
+            playerData.healthL = 150
+            playerData.xpLimit = 200
+            men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+        if playerData.xp >= playerData.xpLimit and playerData.lvl == 2:
+             playerData.lvl = 3
+             playerData.xp -= playerData.xpLimit
+             playerData.healthL = 200
+             playerData.xpLimit = 350
+             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+        if playerData.xp >= playerData.xpLimit and playerData.lvl == 3:
+             playerData.lvl = 4
+             playerData.xp -= playerData.xpLimit
+             playerData.healthL = 250
+             playerData.xpLimit = 500
+             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+        if playerData.xp >= playerData.xpLimit and playerData.lvl == 4:
+             playerData.lvl = 5
+             playerData.xp -= playerData.xpLimit
+             playerData.healthL = 300
+             playerData.xpLimit = 800
+             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+        if playerData.xp >= playerData.xpLimit and playerData.lvl == 5:
+             playerData.lvl = 6
+             playerData.xp -= playerData.xpLimit
+             playerData.healthL = 350
+             playerData.xpLimit = 1100
+             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+        if playerData.xp >= playerData.xpLimit and playerData.lvl == 6:
+             playerData.lvl = 7
+             playerData.xp -= playerData.xpLimit
+             playerData.healthL = 400
+             playerData.xpLimit = 1600
+             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+        if playerData.xp >= playerData.xpLimit and playerData.lvl == 7:
+             playerData.lvl = 8
+             playerData.xp -= playerData.xpLimit
+             playerData.healthL = 450
+             playerData.xpLimit = 2200
+             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+        if playerData.xp >= playerData.xpLimit and playerData.lvl == 8:
+             playerData.lvl = 9
+             playerData.xp -= playerData.xpLimit
+             playerData.healthL = 500
+             playerData.xpLimit = 3000
+             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+        if playerData.xp >= playerData.xpLimit and playerData.lvl == 9:
+             playerData.lvl = 10
+             playerData.xp -= playerData.xpLimit
+             playerData.healthL = 550
+             playerData.xpLimit = 200
+             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+        return render_template("index.html",combat=False,lvlup=True,men=men)
 
 if __name__ == '__main__':
     playerData = PlayerData()
