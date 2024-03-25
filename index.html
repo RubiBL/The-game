@@ -123,5 +123,21 @@
           <form action="/menu" method="post">
               <button type="submit" name="tipo" value="8">Continue</button>
      {% endif %}
+      {% if combat%}
+      <div class="contendedor">
+          {{ men|safe }}
+     {% endif %}
+     {% if action%}
+      <div class="contendedor">
+          {{ men|safe }}
+          <form action="/menu" method="post">
+              <button type="submit" name="tipo" value="9">Continue</button>
+     {% endif %}
+     {% if end%}
+      <div class="contendedor">
+          {{ men|safe }}
+          <form action="/menu" method="post">
+              <button type="submit" name="tipo" value="10">Continue</button>
+     {% endif %}        
 </body>
 </html>
