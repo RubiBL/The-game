@@ -117,5 +117,11 @@
           <form action="/menu" method="post">
               <button type="submit" name="tipo" value="7">Continue</button>
      {% endif %}
+              {% if lvlup%}
+      <div class="contendedor">
+          {{ men|safe }}
+          <form action="/menu" method="post">
+              <button type="submit" name="tipo" value="8">Continue</button>
+     {% endif %}
 </body>
 </html>
