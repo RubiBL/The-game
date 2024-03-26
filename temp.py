@@ -1,5 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request
 import random
+##import pathlib
+import textwrap
+import google.generativeai as genai
+##from IPython.display import display
+from IPython.display import Markdown
 app = Flask(__name__)
 
 
@@ -64,7 +69,7 @@ def pq1():
     else:
        men="<p>You have use Small potion(+10% health)<p>"
        playerData.ppq-=1
-       playerData.health+=(playerData.healthL/10)
+       playerData.health+=round(playerData.healthL/10)
        if playerData.health>=playerData.healthL:
            men+="<p>MAX health<p>"
     return render_template('index.html', inv2=True, inv=False,men=men)  
@@ -77,7 +82,7 @@ def pm1():
     else:
        men="<p>You have use Medium potion(+30% health)<p>"
        playerData.pm-=1
-       playerData.health+=3*(playerData.healthL/10)
+       playerData.health+=round(3*(playerData.healthL/10))
        if playerData.health>=playerData.healthL:
            men+="<p>MAX health<p>"
     return render_template('index.html', inv2=True, inv=False,men=men) 
@@ -180,10 +185,12 @@ def ar32():
 
 @app.route('/inventory', methods=['GET', 'POST'])
 def inventory():
-    men="<h1>Inventory<h1>"
     if playerData.ppq==0 and playerData.pm==0 and playerData.pS==0 and playerData.armadura1==0 and playerData.armadura2==0 and playerData.armadura3==0 and playerData.espada1==0 and playerData.espada2==0 and playerData.espada3==0:
-        men+="<p> you have no items (-_-;)<p> "
+        men="<p> you have no items (-_-;)<p> "
+        men+=f"<p>Gold: {playerData.gold}<p>"
     if playerData.ppq>0:
+        men="<h1>Inventory<h1>"
+        men+=f"<p>Gold: {playerData.gold}<p>"
         men+="""
         <form action="/pq1" method="post">
         <button type="submit" name="boton">Small potion(+10% health)</button>
@@ -283,6 +290,8 @@ def inventory():
 
 @app.route('/menu', methods=['GET', 'POST'])
 def menu():
+    playerData.enemyHP=200
+    playerData.enemyHPL=200
     x = request.form['tipo']
     if x == '1':
         playerData.race=1
@@ -302,7 +311,12 @@ def menu():
     elif x=='7':
         return render_template('index.html', inv2=False, inv=True)
     elif x=='8':
-        return render_template('index.html', levelup=False, menu=True)
+        return render_template('index.html', lvlup=False, menu=True)
+    elif x=='a':
+        return render_template('index.html', end=False, lvlup=True)
+    elif x=='b':
+        return render_template('index.html', hisotry=False, menu=True)
+
 
 @app.route('/pq', methods=['GET', 'POST'])
 def pq():
@@ -427,7 +441,7 @@ def store():
              men="<p>You have no gold ( ͠° ⏥ ͡°)<p>"
              return render_template('index.html', menu=False, inneg=True,men=men)
         if playerData.gold>0:
-             text="<h1 id='texto'>Welcome to Walmart</h1>"
+             text=f"<h1 id='texto'>Welcome to Walmart</h1><br>Gold: {playerData.gold}"
              text+="""
             <form action="/pq" method="post">
              <button type="submit" name="boton">Small potion +10% health(50 Gold)</button>
@@ -458,6 +472,7 @@ def store():
             </form>
             """
         return render_template('index.html',menu=False,inneg=True,men=text)
+
 
 @app.route('/combat', methods=['GET', 'POST'])
 def combat():
@@ -491,7 +506,7 @@ def combat():
       <button type="submit" name="boton">DHoly potion (Max Health)</button>
       </form>
       """
-    return render_template('index.html',menu=False,combat=True)
+    return render_template('index.html',menu=False,action=False,combat=True,men=men)
 @app.route('/ha', methods=['GET', 'POST'])
 def ha():
         daño=5+random.randint(0,25)
@@ -499,51 +514,51 @@ def ha():
         playerData.enemyDamage=round(daño-red)
         playerData.health-=playerData.enemyDamage
         men=f"<p>Enemy dealt {playerData.enemyDamage} point of damage<p>"
-        if playerData.enemyHP<=0:
-            men+="<p>Enemy Defeated\nRewards:\n+50 gold\n+20% Health\n+100XP<p>"
-            playerData.gold+=50
-            playerData.health =playerData.health+(2*(playerData.health/10))
-            playerData.xp += 100
-            if playerData.health==playerData.healthL:
-                men+="<p>Max Health<p>"
-            return render_template('index.html', combat=False, end=True,men=men)
         if playerData.health>0:
-         poder=(playerData.poder+30)+ random.randint (0,playerData.poder)
-         playerData.enemyHP-=poder
-         men+=f"<p>You dealt {poder}points of damage<p>"
-        return render_template('index.html',menu=False,combat=True)
-        if playerData.health<0:
-            men+="<p>You have been defeated\n-100 gold\nHealth restore to 50%<p>"
+            poder=(playerData.poder+30)+ random.randint (0,playerData.poder)
+            playerData.enemyHP-=poder
+            men+=f"<p>You dealt {poder} points of damage<p>"
+            if playerData.enemyHP<0:
+                men+="<p>Enemy Defeated<br>Rewards:<br>+50 gold<br>+20% Health<br>+100XP<p>"
+                playerData.gold+=50
+                playerData.health =playerData.health+(2*(playerData.health/10))
+                playerData.xp += 100
+                if playerData.health==playerData.healthL:
+                    men+="<p>Max Health<p>"
+                return render_template('index.html', combat=False, end=True,men=men)
+            return render_template('index.html',combat=False,action=True,men=men)
+        elif playerData.health<=0:
+            men+="<p>You have been defeated<br>-100 gold<br>Health restore to 50%<p>"
             playerData.gold = playerData.gold - 100;
             playerData.health = 0;
             playerData.health = (playerData.healthL/2)
             return render_template('index.html', combat=False, end=True,men=men)
-@app.route('/la', methods=['GET', 'POST'])
+@app.route('/La', methods=['GET', 'POST'])
 def La(): 
     poder=(playerData.poder-10)+ random.randint (0,playerData.poder)
     playerData.enemyHP-=poder
-    men=f"<p>You dealt {poder}points of damage<p>"
-    if playerData.enemyHP<=0:
-        men+="<p>Enemy Defeated\nRewards:\n+50 gold\n+20% Health\n+100XP<p>"
+    men=f"<p>You dealt {poder} points of damage<p>"
+    if playerData.enemyHP<0:
+        men+="<p>Enemy Defeated<br>Rewards:<br>+50 gold<br>+20% Health<br>+100XP<p>"
         playerData.gold+=50
         playerData.health =playerData.health+(2*(playerData.health/10))
         playerData.xp += 100
         if playerData.health==playerData.healthL:
             men+="<p>Max Health<p>"
-        return render_template('index.html', combat=False, end=True,men=men)
-    if playerData.enemyHP>0:
+            return render_template('index.html', combat=False, end=True,men=men)
+    elif playerData.enemyHP>0:
         daño=5+random.randint(0,25)
         red=(daño * playerData.armadura) / 100.0
         playerData.enemyDamage=round(daño-red)
         playerData.health-=playerData.enemyDamage
         men+=f"<p>Enemy dealt {playerData.enemyDamage} point of damage<p>"
         if playerData.health<0:
-            men+="<p>You have been defeated\n-100 gold\nHealth restore to 50%<p>"
+            men+="<p>You have been defeated<br>-100 gold<br>Health restore to 50%<p>"
             playerData.gold = playerData.gold - 100;
             playerData.health = 0;
             playerData.health = (playerData.healthL/2)
             return render_template('index.html', combat=False, end=True,men=men)
-    return render_template('index.html',menu=False,combat=True)
+    return render_template('index.html',combat=False,action=True,men=men)
 @app.route('/pq2', methods=['GET', 'POST'])
 def pq2():
     if playerData.health==playerData.healthL:
@@ -552,7 +567,7 @@ def pq2():
     else:
        men="<p>You have use Small potion(+10% health)<p>"
        playerData.ppq-=1
-       playerData.health+=(playerData.healthL/10)
+       playerData.health+=round(playerData.healthL/10)
        if playerData.health>=playerData.healthL:
            men+="<p>MAX health<p>"
        daño=5+random.randint(0,25)
@@ -561,7 +576,7 @@ def pq2():
        playerData.health-=playerData.enemyDamage
        men+=f"<p>Enemy dealt {playerData.enemyDamage} point of damage<p>"
        if playerData.health<0:
-           men+="<p>You have been defeated\n-100 gold\nHealth restore to 50%<p>"
+           men+="<p>You have been defeated<br>-100 gold<br>Health restore to 50%<p>"
            playerData.gold = playerData.gold - 100;
            playerData.health = 0;
            playerData.health = (playerData.healthL/2)
@@ -576,7 +591,7 @@ def pm2():
     else:
        men="<p>You have use Medium potion(+30% health)<p>"
        playerData.pm-=1
-       playerData.health+=3*(playerData.healthL/10)
+       playerData.health+=round(3*(playerData.healthL/10))
        if playerData.health>=playerData.healthL:
            men+="<p>MAX health<p>"
        daño=5+random.randint(0,25)
@@ -585,7 +600,7 @@ def pm2():
        playerData.health-=playerData.enemyDamage
        men+=f"<p>Enemy dealt {playerData.enemyDamage} point of damage<p>"
        if playerData.health<0:
-           men+="<p>You have been defeated\n-100 gold\nHealth restore to 50%<p>"
+           men+="<p>You have been defeated<br>-100 gold<br>Health restore to 50%<p>"
            playerData.gold = playerData.gold - 100;
            playerData.health = 0;
            playerData.health = (playerData.healthL/2)
@@ -608,69 +623,69 @@ def pS2():
        playerData.health-=playerData.enemyDamage
        men+=f"<p>Enemy dealt {playerData.enemyDamage} point of damage<p>"
        if playerData.health<0:
-           men+="<p>You have been defeated\n-100 gold\nHealth restore to 50%<p>"
+           men+="<p>You have been defeated<br>-100 gold<br>Health restore to 50%<p>"
            playerData.gold = playerData.gold - 100;
            playerData.health = 0;
            playerData.health = (playerData.healthL/2)
            return render_template('index.html', combat=False, end=True,men=men)
-    return render_template('index.html', combat=False, action=True,men=men)
+    return render_template('index.html', combat=False, action=True,men=men) 
 @app.route('/levelup', methods=['GET', 'POST'])
-def levelup(playerData):
+def levelup():
     if playerData.xp >= playerData.xpLimit and playerData.lvl < 10:
         if playerData.xp >= playerData.xpLimit and playerData.lvl == 1:
             playerData.lvl = 2
             playerData.xp -= playerData.xpLimit
             playerData.healthL = 150
             playerData.xpLimit = 200
-            men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+            men=f"<p>Congrats you level up:<br>LVL{playerData.lvl}<p>"
         if playerData.xp >= playerData.xpLimit and playerData.lvl == 2:
              playerData.lvl = 3
              playerData.xp -= playerData.xpLimit
              playerData.healthL = 200
              playerData.xpLimit = 350
-             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+             men=f"<p>Congrats you level up:<br>LVL{playerData.lvl}<p>"
         if playerData.xp >= playerData.xpLimit and playerData.lvl == 3:
              playerData.lvl = 4
              playerData.xp -= playerData.xpLimit
              playerData.healthL = 250
              playerData.xpLimit = 500
-             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+             men=f"<p>Congrats you level up:<br>LVL{playerData.lvl}<p>"
         if playerData.xp >= playerData.xpLimit and playerData.lvl == 4:
              playerData.lvl = 5
              playerData.xp -= playerData.xpLimit
              playerData.healthL = 300
              playerData.xpLimit = 800
-             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+             men=f"<p>Congrats you level up:<br>LVL{playerData.lvl}<p>"
         if playerData.xp >= playerData.xpLimit and playerData.lvl == 5:
              playerData.lvl = 6
              playerData.xp -= playerData.xpLimit
              playerData.healthL = 350
              playerData.xpLimit = 1100
-             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+             men=f"<p>Congrats you level up:<br>LVL{playerData.lvl}<p>"
         if playerData.xp >= playerData.xpLimit and playerData.lvl == 6:
              playerData.lvl = 7
              playerData.xp -= playerData.xpLimit
              playerData.healthL = 400
              playerData.xpLimit = 1600
-             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+             men=f"<p>Congrats you level up:<br>LVL{playerData.lvl}<p>"
         if playerData.xp >= playerData.xpLimit and playerData.lvl == 7:
              playerData.lvl = 8
              playerData.xp -= playerData.xpLimit
              playerData.healthL = 450
              playerData.xpLimit = 2200
-             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+             men=f"<p>Congrats you level up:<br>LVL{playerData.lvl}<p>"
         if playerData.xp >= playerData.xpLimit and playerData.lvl == 8:
              playerData.lvl = 9
              playerData.xp -= playerData.xpLimit
              playerData.healthL = 500
              playerData.xpLimit = 3000
-             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+             men=f"<p>Congrats you level up:<br>LVL{playerData.lvl}<p>"
         if playerData.xp >= playerData.xpLimit and playerData.lvl == 9:
              playerData.lvl = 10
              playerData.xp -= playerData.xpLimit
              playerData.healthL = 550
              playerData.xpLimit = 200
-             men=f"<p>Congrats you level up: LVL{playerData.lvl}<p>"
+             men=f"<p>Congrats you level up:<br>LVL{playerData.lvl}<p>"
         return render_template("index.html",combat=False,lvlup=True,men=men)
     return render_template("index.html",combat=False,menu=True)
 
@@ -679,7 +694,7 @@ if __name__ == '__main__':
     playerData.health = 100
     playerData.poder = 20
     playerData.armadura = 10
-    playerData.gold = 10
+    playerData.gold = 50
     playerData.ppq = 0
     playerData.pm = 0
     playerData.pS = 0
@@ -696,4 +711,6 @@ if __name__ == '__main__':
     playerData.xp = 0
     playerData.healthL = 100
     playerData.xpLimit = 100
+    playerData.enemyHP=200
+    playerData.enemyHPL=200
     app.run(debug=True)
