@@ -117,27 +117,33 @@
           <form action="/menu" method="post">
               <button type="submit" name="tipo" value="7">Continue</button>
      {% endif %}
-              {% if lvlup%}
+     {% if lvlup%}
       <div class="contendedor">
           {{ men|safe }}
           <form action="/menu" method="post">
               <button type="submit" name="tipo" value="8">Continue</button>
      {% endif %}
-      {% if combat%}
+     {% if combat%}
       <div class="contendedor">
           {{ men|safe }}
      {% endif %}
      {% if action%}
       <div class="contendedor">
           {{ men|safe }}
-          <form action="/menu" method="post">
+          <form action="/combat" method="post">
               <button type="submit" name="tipo" value="9">Continue</button>
      {% endif %}
      {% if end%}
       <div class="contendedor">
           {{ men|safe }}
+          <form action="/levelup" method="post">
+              <button type="submit" name="tipo" value="a">Continue</button>
+     {% endif %}
+     {% if history%}
+      <div class="contendedor">
+          {{ story|safe }}
           <form action="/menu" method="post">
-              <button type="submit" name="tipo" value="10">Continue</button>
-     {% endif %}        
+              <button type="submit" name="tipo" value="b">Continue</button>
+     {% endif %}
 </body>
 </html>
